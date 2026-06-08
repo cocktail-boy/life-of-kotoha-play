@@ -135,6 +135,34 @@ body {
 .chip-name { font-weight: 600; }
 .chip-sub { font-size: 0.68rem; opacity: 0.8; font-variant-numeric: tabular-nums; }
 
+/* Time-of-day chibi icons: each slot is a sprite; the active one is lifted and
+   plays its blink/bounce/sway loop. Inactive slots rest, dimmed and desaturated. */
+#times.bar { gap: 6px; align-items: flex-end; }
+.chip-time {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  line-height: 0;
+  transition: transform 0.2s ease;
+}
+.chip-time .chibi {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  opacity: 0.5;
+  filter: saturate(0.65) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+  transition: opacity 0.2s ease, filter 0.2s ease;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.chip-time:hover .chibi { opacity: 0.8; }
+.chip-time.is-active { transform: scale(1.12); }
+.chip-time.is-active .chibi {
+  opacity: 1;
+  filter: saturate(1) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+}
+
 .site-link {
   position: absolute;
   bottom: max(env(safe-area-inset-bottom), 16px);

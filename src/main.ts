@@ -6,6 +6,9 @@ import {
   CITIES,
   TIMES,
   cellActivity,
+  chibiAsset,
+  chibiBase,
+  clockInCity,
   cityShortName,
   cityDisplayName,
   cycled,
@@ -15,6 +18,9 @@ import {
   type City,
   type TimeOfDay,
 } from "./world";
+
+const chibiURL = (name: string) =>
+  `${import.meta.env.BASE_URL}assets/chibi/${name}.png`;
 
 const $ = <T extends HTMLElement>(sel: string) => {
   const el = document.querySelector<T>(sel);
@@ -60,8 +66,22 @@ class World {
     await this.scene.show(this.viewedCity, this.viewedTime);
     this.render();
     this.wire();
-    // Follow the real clock; if the viewer is sitting on home, advance with it.
-    window.setInterval(() => this.tickClock(), 60_000);
+    // Tick the world clock on each wall-clock minute boundary; if the viewer is
+    // sitting on home, advance the scene with it too.
+    this.scheduleClockTick();
+    // Animate the active time-of-day chibi (matches the native app's 0.25s frames).
+    this.tickChibi();
+    window.setInterval(() => this.tickChibi(), 250);
+  }
+
+  /** Self-rescheduling tick aligned to the next wall-clock minute. */
+  private scheduleClockTick() {
+    const now = new Date();
+    const msToNextMinute = 60_000 - (now.getSeconds() * 1000 + now.getMilliseconds());
+    window.setTimeout(() => {
+      this.tickClock();
+      this.scheduleClockTick();
+    }, msToNextMinute + 20);
   }
 
   private wire() {
@@ -114,13 +134,49 @@ class World {
     for (const time of TIMES) {
       const b = document.createElement("button");
       b.dataset.time = time;
-      b.className = "chip";
-      b.textContent = time;
+      b.className = "chip-time";
+      b.setAttribute("aria-label", time);
+      b.title = time;
+      const img = document.createElement("img");
+      img.className = "chibi";
+      img.alt = time;
+      img.draggable = false;
+      img.dataset.frame = chibiBase(time);
+      img.src = chibiURL(chibiBase(time));
+      b.appendChild(img);
       b.addEventListener("click", (e) => {
         e.stopPropagation();
         this.showTime(time);
       });
       timeBar.appendChild(b);
+    }
+    this.preloadChibi();
+  }
+
+  /** Warm the cache so the active icon's animation frames swap without flicker. */
+  private preloadChibi() {
+    for (const time of TIMES) {
+      for (const suffix of ["", "_blink", "_bounce", "_sway"]) {
+        new Image().src = chibiURL(`${chibiBase(time)}${suffix}`);
+      }
+    }
+  }
+
+  /** Drive the active chibi's blink/bounce/sway loop (others rest on base). */
+  private tickChibi() {
+    const now = new Date();
+    const secondInMinute = now.getSeconds() + now.getMilliseconds() / 1000;
+    for (const b of timeBar.querySelectorAll<HTMLButtonElement>("button")) {
+      const time = b.dataset.time as TimeOfDay;
+      const img = b.querySelector<HTMLImageElement>("img.chibi");
+      if (!img) continue;
+      const frame = time === this.viewedTime
+        ? chibiAsset(time, secondInMinute)
+        : chibiBase(time);
+      if (img.dataset.frame !== frame) {
+        img.dataset.frame = frame;
+        img.src = chibiURL(frame);
+      }
     }
   }
 
@@ -148,7 +204,9 @@ class World {
     this.homeCity = home.city;
     this.homeTime = home.time;
     if (wasHome && (this.viewedCity !== home.city || this.viewedTime !== home.time)) {
-      this.setViewed(home.city, home.time);
+      this.setViewed(home.city, home.time); // renders
+    } else {
+      this.render(); // keep the world clock's HH:MM advancing
     }
   }
 
@@ -176,8 +234,7 @@ class World {
 
     for (const b of cityBar.querySelectorAll<HTMLButtonElement>("button")) {
       const city = b.dataset.city as City;
-      const hour = hourInCity(city);
-      b.innerHTML = `<span class="chip-name">${cityShortName[city]}</span><span class="chip-sub">${String(hour).padStart(2, "0")}:00</span>`;
+      b.innerHTML = `<span class="chip-name">${cityShortName[city]}</span><span class="chip-sub">${clockInCity(city)}</span>`;
       b.title = cityDisplayName[city];
       b.classList.toggle("is-active", city === this.viewedCity);
     }

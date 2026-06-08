@@ -72,6 +72,16 @@ export function hourInCity(city: City, now: Date = new Date()): number {
   return hour === 24 ? 0 : hour;
 }
 
+/** Live local wall-clock "HH:MM" in a given city (24h), via the Intl API. */
+export function clockInCity(city: City, now: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: cityTimeZone[city],
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(now);
+}
+
 /** The live "home" moment: your nearest city + its current time of day. */
 export function homeMoment(now: Date = new Date()): { city: City; time: TimeOfDay } {
   const city = homeCity();
@@ -93,3 +103,19 @@ export const candidVideo = (city: City, time: TimeOfDay) => `${slug(city, time)}
 export const noticeVideo = (city: City, time: TimeOfDay) => `${slug(city, time)}_notice`;
 export const returnVideo = (city: City, time: TimeOfDay) => `${slug(city, time)}_return`;
 export const bgmTrack = (city: City, time: TimeOfDay) => `bgm_${city}_${time}`;
+
+// Chibi time-of-day icons (ported from TimeOfDay.chibi* in the native app). The
+// resting pose is `time_chibi_<time>`; the active icon plays a quick blink ->
+// bounce -> sway flourish in the first 0.75s of every 5-second cycle.
+export const chibiBase = (time: TimeOfDay) => `time_chibi_${time}`;
+
+export function chibiAsset(time: TimeOfDay, secondInMinute: number): string {
+  const base = chibiBase(time);
+  const raw = secondInMinute % 60;
+  const normalized = raw >= 0 ? raw : raw + 60;
+  const local = normalized % 5;
+  if (local < 0.25) return `${base}_blink`;
+  if (local < 0.5) return `${base}_bounce`;
+  if (local < 0.75) return `${base}_sway`;
+  return base;
+}
