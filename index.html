@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Life of Kotoha</title>
+<meta name="description" content="Life of Kotoha — a quiet, living world. Kotoha lives her day across Tokyo, London, and San Francisco. Look in, and tap to say hello.">
+<meta name="theme-color" content="#0c0a08">
+</head>
+<body>
+<div id="stage">
+  <div id="backdrop"></div>
+  <video id="layer-a" class="layer is-front" muted playsinline></video>
+  <video id="layer-b" class="layer" muted playsinline></video>
+
+  <div id="chrome">
+    <div class="top">
+      <button id="title" aria-label="Go to your time">Life of Kotoha</button>
+      <button id="mute" aria-label="Turn on sound">🔇</button>
+    </div>
+    <div class="bottom">
+      <p id="caption"></p>
+      <div id="cities" class="bar"></div>
+      <div id="times" class="bar"></div>
+    </div>
+  </div>
+
+  <a class="site-link" href="https://cocktail-boy.github.io/life-of-kotoha-site/">About &amp; privacy</a>
+</div>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

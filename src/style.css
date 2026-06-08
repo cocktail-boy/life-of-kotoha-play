@@ -1,0 +1,149 @@
+:root {
+  --ink: #f4ece2;
+  --shadow: 0 1px 12px rgba(0, 0, 0, 0.55);
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  min-height: 100dvh;
+  background: #000;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+  color: var(--ink);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Center the scene as a 9:16 portrait frame. On a phone in portrait it fills
+   the screen; on a wide/desktop window it stays a centered vertical card
+   (letterboxed) so the full painted scene — including her face — always shows. */
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#stage {
+  position: relative;
+  height: min(100dvh, calc(100vw * 16 / 9));
+  aspect-ratio: 9 / 16;
+  max-width: 100vw;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+#backdrop {
+  position: absolute;
+  inset: 0;
+  transition: background 1.2s ease;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+.layer.is-front { opacity: 1; }
+
+/* Readability scrims top and bottom over the video. */
+#chrome {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.35), transparent 18%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.45), transparent 32%);
+}
+#chrome button { pointer-events: auto; }
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(env(safe-area-inset-top), 16px) 18px 0;
+}
+#title {
+  background: none;
+  border: 0;
+  color: var(--ink);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-shadow: var(--shadow);
+  cursor: pointer;
+  padding: 6px 2px;
+}
+#mute {
+  background: rgba(0, 0, 0, 0.25);
+  border: 0;
+  color: var(--ink);
+  font-size: 1rem;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+
+.bottom {
+  padding: 0 14px max(env(safe-area-inset-bottom), 16px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+#caption {
+  margin: 0;
+  font-size: 0.95rem;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  text-shadow: var(--shadow);
+  opacity: 0.92;
+}
+.bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.chip {
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid transparent;
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  line-height: 1.1;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  text-transform: capitalize;
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+.chip:hover { background: rgba(0, 0, 0, 0.42); }
+.chip.is-active {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+#cities .chip { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.chip-name { font-weight: 600; }
+.chip-sub { font-size: 0.68rem; opacity: 0.8; font-variant-numeric: tabular-nums; }
+
+.site-link {
+  position: absolute;
+  bottom: max(env(safe-area-inset-bottom), 16px);
+  right: 14px;
+  font-size: 0.72rem;
+  color: var(--ink);
+  opacity: 0.6;
+  text-decoration: none;
+  text-shadow: var(--shadow);
+  pointer-events: auto;
+}
+.site-link:hover { opacity: 0.9; }
